@@ -1,0 +1,11 @@
+CHIP RAM2 {
+    IN in[16], load, address;
+    OUT out[16];
+
+    PARTS:
+    // Put your code here:
+    DMux(in=load,sel=address,a=load1,b=load2);
+    Register(in=in,load=load1,out=out0);
+    Register(in=in,load=load2,out=out1);
+    Mux16(a=out0,b=out1,sel=address,out=out);
+}

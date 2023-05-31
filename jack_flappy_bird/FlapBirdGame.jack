@@ -1,0 +1,125 @@
+
+class FlapBirdGame
+{
+    field int score;
+    field int best_score;
+    field Bird bird;
+
+    constructor FlapBirdGame new()
+    {
+        let score = 0;
+        let bird = Bird.new(100,100);
+        return this;
+    }
+
+    method void displayStart()
+    {
+        var string str_to_print1;
+        var string str_to_print2;
+
+        let str_to_print1 = "best score: ";
+        let str_to_print2 = "press any key to start";
+
+        do Screen.clearScreen();
+        do Output.moveCursor(0,0);
+
+        do Output.printString(str_to_print1);
+        do Output.printInt(best_score);
+        
+        do Output.moveCursor(1,0);
+
+        do Output.printString(str_to_print2);
+
+        return;
+    }
+
+    method void startGame()
+    {
+        var char key;
+        var int bird_acc;
+        do Screen.clearScreen();
+
+        while(~bird.isADeadBird())
+        {
+            do Screen.clearScreen();
+            let key = getNewPush();
+            let bird_acc = getNewBirdAcc(~(key=0));
+            do bird.updateAcc(bird_acc);
+            do bird.gotoNextPlace();
+            do drawInfo();
+            let score = score + 1;
+        }
+
+        return;
+    }
+    
+    method int getNewBirdAcc(boolean flap)
+    {
+        if(flap)
+        {
+            return 1;
+        }
+        else{
+            return 0;
+        }
+    }
+
+    method void run()
+    {
+        var char key;
+        while(true)
+        {
+            do displayStart();
+            let key = getNewPush();
+            while (key = 0) 
+            { 
+                let key = getNewPush();
+            }
+            do startGame();
+            do displayEnd();
+            let key = getNewPush();
+            while (key = 0) 
+            { 
+                let key = getNewPush();
+            }
+            let score = 0;
+        }
+        return;
+    }
+
+    method char getNewPush()
+    {
+        return Keyboard.keyPressed();
+    }
+
+    method void displayEnd()
+    {
+        var string str_to_print1;
+        var string str_to_print2;
+
+        let str_to_print1 = "score: ";
+        let str_to_print2 = "press any key to restart";
+
+        do Screen.clearScreen();
+        do Output.moveCursor(0,0);
+
+        do Output.printString(str_to_print1);
+        do Output.printInt(score);
+        
+        do Output.moveCursor(1,0);
+        do Output.printString(str_to_print2);
+
+        return;
+    }
+    
+    method void drawInfo()
+    {
+        return;
+    }
+
+    method void dispose(){
+        do bird.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+}

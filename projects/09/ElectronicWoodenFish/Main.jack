@@ -1,0 +1,9 @@
+class Main{
+    function void main()
+    {
+        var WoodenFish game;
+        let game = WoodenFish.new();
+        do game.start();
+        return;
+    }
+}

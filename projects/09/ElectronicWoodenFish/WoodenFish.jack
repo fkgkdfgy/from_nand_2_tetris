@@ -1,0 +1,56 @@
+class WoodenFish
+{
+    field int mallet_status;
+    constructor WoodenFish new()
+    {
+        let mallet_status = 0;
+        return this;
+    }
+
+    method void start(){
+        do drawWoodenFish(0);
+        while(1)
+        {
+            
+        }
+        return ;
+    }
+
+    method void drawWoodenFish(int location) {
+        var int memAddress;
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, -1024);
+        do Memory.poke(memAddress+1, 127);
+        do Memory.poke(memAddress+32, 896);
+        do Memory.poke(memAddress+33, 384);
+        do Memory.poke(memAddress+64, 112);
+        do Memory.poke(memAddress+65, 768);
+        do Memory.poke(memAddress+96, 8);
+        do Memory.poke(memAddress+97, 3584);
+        do Memory.poke(memAddress+128, 6);
+        do Memory.poke(memAddress+129, 6144);
+        do Memory.poke(memAddress+160, 1);
+        do Memory.poke(memAddress+161, 4096);
+        do Memory.poke(memAddress+192, 14337);
+        do Memory.poke(memAddress+193, 12288);
+        do Memory.poke(memAddress+224, 31745);
+        do Memory.poke(memAddress+225, 16384);
+        do Memory.poke(memAddress+256, 32767);
+        do Memory.poke(memAddress+257, 16384);
+        do Memory.poke(memAddress+288, 31745);
+        do Memory.poke(memAddress+289, 16384);
+        do Memory.poke(memAddress+320, 14337);
+        do Memory.poke(memAddress+321, 16384);
+        do Memory.poke(memAddress+352, 6);
+        do Memory.poke(memAddress+353, 8192);
+        do Memory.poke(memAddress+384, 4);
+        do Memory.poke(memAddress+385, 4096);
+        do Memory.poke(memAddress+416, 8);
+        do Memory.poke(memAddress+417, 6144);
+        do Memory.poke(memAddress+448, 504);
+        do Memory.poke(memAddress+449, 1792);
+        do Memory.poke(memAddress+480, -512);
+        do Memory.poke(memAddress+481, 255);
+        return;
+    }
+}

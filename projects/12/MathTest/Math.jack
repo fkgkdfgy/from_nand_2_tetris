@@ -1,0 +1,180 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Math.jack
+
+/**
+ * A library of commonly used mathematical functions.
+ * Note: Jack compilers implement multiplication and division using OS method calls.
+ */
+class Math {
+
+    static Array BITS_NUM;
+    static int DATA_BLOCK_SIZE;
+
+    /** Initializes the library. */
+    function void init() {
+        // init DATA_BLOCK_SIZE
+        var int i;
+        var int multiply_value;
+        let DATA_BLOCK_SIZE = 16;
+        let i=0;
+        let multiply_value = 1;
+        let BITS_NUM = Array.new(16);
+        while(i<16)
+        {
+            let BITS_NUM[i] = multiply_value;
+            let i = i+1;
+            let multiply_value = multiply_value + multiply_value;
+        }
+        return;
+    }
+
+    /** Returns the number of left_moves needed to represent the given number. */
+    function int leftMove(int x, int left_moves) {
+        return x * BITS_NUM[left_moves];
+    }
+
+    /** Returns the number of right_moves needed to represent the given number. */
+    function int rightMove(int x, int right_moves) {
+        return x / BITS_NUM[right_moves];
+    }
+
+
+    /** Returns the bit of number x at the given index. */
+    function int bit(int x, int index) {
+        if (x & BITS_NUM[index])
+        {
+            return 1;
+        }
+        return 0;
+    }
+
+    /** Returns the absolute value of x. */
+    function int abs(int x) {
+        if (x>0)
+        {
+            return x;
+        }
+        return -x;
+    }
+
+
+    /** Returns the product of x and y. 
+     *  When a Jack compiler detects the multiplication operator '*' in the 
+     *  program's code, it handles it by invoking this method. In other words,
+     *  the Jack expressions x*y and multiply(x,y) return the same value.
+     */
+    function int multiply(int x, int y) {
+        var int shift_index , signal, result, shift_value;
+        let shift_index = 0;
+        let shift_value = x;
+        let signal = 1;
+        let result = 0;
+
+        if((x=0)&(y=0))
+        {
+            return 0;
+        }
+
+        if(y<0)
+        {
+            let signal = -1;
+            let y = -y;
+        }
+        while(shift_index<DATA_BLOCK_SIZE)
+        {
+            if(Math.bit(y, shift_index))
+            {
+                let result = result + shift_value;
+            }
+            let shift_value = shift_value + shift_value;
+            let shift_index = shift_index + 1;
+        }
+
+        if(signal<0)
+        {
+            let result = -result;
+        }
+        return result;
+    }
+
+    /** Returns the integer part of x/y.
+     *  When a Jack compiler detects the multiplication operator '/' in the 
+     *  program's code, it handles it by invoking this method. In other words,
+     *  the Jack expressions x/y and divide(x,y) return the same value.
+     */
+    function int divide(int a, int b) {
+        var int result_from_2b, sign_a, sign_b, sign, result;
+        let result_from_2b = 0;
+        let sign = 1;
+        let sign_a = 1;
+        let sign_b = 1;
+        if(a<0)
+        {
+            let sign_a = -1;
+        }        
+        
+        if(b<0)
+        {
+            let sign_b = -1;
+        }
+
+        let sign = sign_a * sign_b;
+
+        let a = Math.abs(a);
+        let b = Math.abs(b);
+        
+        if((a<b)|(b=0))
+        {
+            return 0;
+        }        
+        
+        let result_from_2b = Math.divide(a, 2*b);
+
+        if( (a-(2*b*result_from_2b))< b)
+        {
+            let result = 2*result_from_2b;
+        }
+        else
+        {
+            let result = 2*result_from_2b+1;
+        }
+        return result*sign;
+    }
+
+    /** Returns the integer part of the square root of x. */
+    function int sqrt(int x) {
+        var int try_index,tmp_square_value, result;
+        let try_index = 7;
+        let result = 0;
+        while(~(try_index<0))
+        {
+            let tmp_square_value = (result + BITS_NUM[try_index])* (result + BITS_NUM[try_index]);
+            if((~(tmp_square_value>x)) & (tmp_square_value>0))
+            {
+                let result = result + BITS_NUM[try_index];
+            }
+            let try_index = try_index - 1;
+        }
+        return result;
+    }
+
+    /** Returns the greater number. */
+    function int max(int a, int b) {
+        if(a>b)
+        {
+            return a;
+        }
+        return b;
+    }
+
+    /** Returns the smaller number. */
+    function int min(int a, int b) {
+        if(a<b)
+        {
+            return a;
+        }
+        return b;
+    }
+}

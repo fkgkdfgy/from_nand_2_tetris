@@ -1,0 +1,195 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Memory.jack
+
+/**
+ * This library provides two services: direct access to the computer's main
+ * memory (RAM), and allocation and recycling of memory blocks. The Hack RAM
+ * consists of 32,768 words, each holding a 16-bit binary number.
+ */ 
+class Memory {
+
+    static Array total_memory;
+    static Array free_block_list, used_block_list;
+    static int base_heap;
+
+    /** Initializes the class. */
+    function void init() {
+        let total_memory = 0;
+        let base_heap = 2048;
+        let free_block_list = Memory.createBlock(base_heap, 14334, 0);
+        let used_block_list = 0;
+    }
+
+    /** Returns the RAM value at the given address. */
+    function int peek(int address) {
+        return total_memory[address];
+    }
+
+    /** Sets the RAM value at the given address to the given value. */
+    function void poke(int address, int value) {
+        let total_memory[address] = value;
+    }
+
+
+    /** Finds an available RAM block of the given size and returns
+     *  a reference to its base address. */
+    function int alloc(int size) {
+        var Array free_block_iter, new_free_block, new_used_block;
+        var int new_block_head,new_block_size;
+        let free_block_iter = free_block_list;
+        while(free_block_iter)
+        {
+            if(~(Memory.getBlockSize(free_block_iter) < (size+2)))
+            {
+                let free_block_iter[1] = Memory.getBlockSize(free_block_iter) - (size + 2);
+                let new_block_head = free_block_iter + Memory.getBlockSize(free_block_iter) + 2;
+                let new_block_size = size;
+                let new_used_block = Memory.createBlock(new_block_head, new_block_size, 0);
+                do Memory.setBlockNext(used_block_list, new_used_block);
+                return Memory.getBlockAddress(new_used_block);
+            }
+            else
+            {
+                let free_block_iter = Memory.getBlockNext(free_block_iter);
+            }
+        }
+
+        do Memory.reAllocFreeList(total_memory);
+        let free_block_iter = free_block_list;
+        while(free_block_iter)
+        {
+            if(~(Memory.getBlockSize(free_block_iter) < (size+2)))
+            {
+                let free_block_iter[1] = Memory.getBlockSize(free_block_iter) - (size + 2);
+                let new_block_head = free_block_iter + Memory.getBlockSize(free_block_iter) + 2;
+                let new_block_size = size;
+                let new_used_block = Memory.createBlock(new_block_head, new_block_size, 0);
+                do Memory.setBlockNext(used_block_list, new_used_block);
+                return Memory.getBlockAddress(new_used_block);
+            }
+            else
+            {
+                let free_block_iter = Memory.getBlockNext(free_block_iter);
+            }
+        }
+                
+        return false;
+    }
+
+    /** reAlloc: re-allocates the given object (cast as an array) to a new size. */
+    function void reAllocFreeList(Array o)
+    {
+        var Array new_free_block;
+        var Array end_address_iter, end_address_pre_iter, start_address_of_next_block_iter;
+        var int new_block_head, new_block_size;
+        var boolean trigger_realloc;
+        // go through all free blocks, if the end address is the same as the start address of the next block, merge them
+        let start_address_of_next_block_iter = free_block_list;
+        while(start_address_of_next_block_iter)
+        {
+            let end_address_pre_iter = free_block_list;
+            let end_address_iter = Memory.getBlockNext(free_block_list);
+            let trigger_realloc = true;
+            while(trigger_realloc)
+            {
+                let trigger_realloc = false;
+                while(end_address_iter)
+                {
+                    if((start_address_of_next_block_iter + Memory.getBlockSize(start_address_of_next_block_iter) + 2) = end_address_iter)
+                    {
+                        let start_address_of_next_block_iter[1] = Memory.getBlockSize(start_address_of_next_block_iter) 
+                                                            + Memory.getBlockSize(end_address_iter)
+                                                            + 2;
+                        do Memory.removeNextBlock(end_address_pre_iter);
+                        do Memory.setBlockNext(end_address_pre_iter, Memory.getBlockNext(end_address_iter));
+                        let trigger_realloc = true;
+                    }
+                }
+            }
+        }
+
+    }
+
+    /** De-allocates the given object (cast as an array) by making
+     *  it available for future allocations. */
+    function void deAlloc(Array o) {
+        // go through free_block_iter, find the position of o, insert it
+        var Array used_block_pre_iter, used_block_iter;
+        let used_block_iter = used_block_list;
+
+        if(Memory.getBlockAddress(used_block_iter)=o)
+        {
+            let used_block_list = Memory.getBlockNext(used_block_iter);
+            do Memory.setBlockNext(free_block_list, used_block_iter);
+            return;
+        }
+
+        let used_block_iter = Memory.getBlockNext(used_block_iter);
+
+        while(used_block_iter)
+        {
+            if(Memory.getBlockAddress(used_block_iter)=o)
+            {
+                do Memory.removeNextBlock(used_block_pre_iter);
+                do Memory.setBlockNext(used_block_pre_iter, Memory.getBlockNext(used_block_iter));
+                do Memory.setBlockNext(free_block_list, used_block_iter);
+                return;
+            }
+            let used_block_pre_iter = used_block_iter;
+            let used_block_iter = Memory.getBlockNext(used_block_iter);
+        }
+
+    }
+
+
+    /** List Manage: get block size */
+    function int getBlockSize(Array o) {
+        return o[1];
+    }
+
+    /** List Manage: get block next */
+    function Array getBlockNext(Array o) {
+        return o[0];
+    }
+
+    /** List Manage: set block next */
+    function void setBlockNext(Array o, Array next) {
+        var Array tmp_next;
+        if(o[0])
+        {
+            let tmp_next = o[0];
+            let o[0] = next;
+            let next[0] = tmp_next;
+        }
+        else
+        {
+            let o[0] = next;
+        }
+    }
+
+    /** List Manage: remove next block */
+    function void removeNextBlock(Array o) {
+        var Array tmp_next;
+        if(o[0])
+        {
+            let tmp_next = o[0];
+            let o[0] = tmp_next[0];
+        }
+    }
+
+    /** List Manage: create new block */
+    function Array createBlock(Array head, int size, Array next) {
+        let head[0] = next;
+        let head[1] = size;
+        return head;
+    }
+
+    /** List Manage: get actual block address */
+    function Array getBlockAddress(Array o) {
+        return o+2;
+    }
+
+
+}

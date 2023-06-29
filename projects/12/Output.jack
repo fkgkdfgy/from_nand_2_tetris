@@ -18,9 +18,20 @@ class Output {
 
     // Character map for displaying characters
     static Array charMaps; 
+    static Array gridMaps;
+    static Array coveredChar;
+    static int screenWidth, screenHead;
+    static int gridWidth, gridLength;
+    static int selectedRow,selectedCol;
 
     /** Initializes the screen, and locates the cursor at the screen's top-left. */
     function void init() {
+        do Screen.clearScreen();
+        do Output.initMap();
+        let selectedRow = 0;
+        let selectedCol = 0;
+        do Output.moveCursor(0,0);
+        return;
     }
 
     // Initializes the character map array
@@ -71,7 +82,7 @@ class Output {
         do Output.create(64,30,51,51,59,59,59,27,3,30,0,0);  // @
         do Output.create(63,30,51,51,24,12,12,0,12,12,0,0);  // ?
 
-        do Output.create(65,0,0,0,0,0,0,0,0,0,0,0);          // A ** TO BE FILLED **
+        do Output.create(65,12,30,51,51,63,51,51,51,51,0,0);          // A ** TO BE FILLED **
         do Output.create(66,31,51,51,51,31,51,51,51,31,0,0); // B
         do Output.create(67,28,54,35,3,3,3,35,54,28,0,0);    // C
         do Output.create(68,15,27,51,51,51,51,51,27,15,0,0); // D
@@ -137,6 +148,10 @@ class Output {
         do Output.create(125,7,12,12,12,56,12,12,12,7,0,0);    // }
         do Output.create(126,38,45,25,0,0,0,0,0,0,0,0);        // ~
 
+        let gridWidth = 11;
+        let screenLength = 32;
+        let screenHead = 16384;
+
 	return;
     }
 
@@ -176,28 +191,156 @@ class Output {
     /** Moves the cursor to the j-th column of the i-th row,
      *  and erases the character displayed there. */
     function void moveCursor(int i, int j) {
+        Output.recoverChar();
+        let selectedCol = j;
+        let selectedRow = i;
+        Output.rememberChar();
+        Output.printChar(95); // _
+        return;
+    }
+
+    /** Saves the character displayed at the cursor location. */
+    function void rememberChar()
+    {
+        var int moveValue,i;
+        var Array gridMap;
+        let moveValue = 1;
+        if ((Col/2*2)=Col)
+        {
+            let moveValue = 256;
+        }
+        
+        gridMap = Output.getGrid(selectedRow,selectedCol);
+        let i=0;
+        while(i<11)
+        {
+            let coveredChar[i] = Memory.peek(gridMap[i])/4/moveValue;
+            let i = i+1;
+        }
+
+        return;
+    }
+
+    /** Restores the character displayed at the cursor location. */
+    function void recoverChar()
+    {
+        var int bitMask,moveValue,i;
+        var Array gridMap;
+        let moveValue = 1;
+        if ((Col/2*2)=Col)
+        {
+            let moveValue = 256;
+        }
+        
+        let gridMap = Output.getGrid(selectedRow,selectedCol);
+        let bitMask = Output.getBitMask(selectedCol);
+        let i=0;
+        while(i<11)
+        {
+            let tmp_addr = gridMap[i];
+            let tmp_value = Memory.peek(tmp_addr);
+            let tmp_value = (tmp_value & (~bitMask)) + (coveredChar[i] * 4 * moveValue);
+            do Memory.poke(tmp_addr,tmp_value);
+            let i = i+1;
+        }
+
+        return;
     }
 
     /** Displays the given character at the cursor location,
      *  and advances the cursor one column forward. */
     function void printChar(char c) {
+        var int bitMask,i,tmp_value,tmp_addr,moveValue;
+        var Array gridMap;
+        let gridMap = Output.getGrid(selectedRow,selectedCol);
+        let bitMask = Output.getBitMask(selectedCol);
+
+        let moveValue = 1;
+        if((Col/2*2)=Col)
+        {
+            let moveValue = 256;
+        }
+
+        let i=0;
+        while(i<11)
+        {
+            let tmp_addr = gridMap[i];
+            let tmp_value = Memory.peek(tmp_addr);
+            let tmp_value = (tmp_value & (~bitMask)) + (charMaps[c] * 4 * moveValue);
+            do Memory.poke(tmp_addr,tmp_value);
+        }
+
+        do Output.backSpace();
+        return;
     }
 
     /** displays the given string starting at the cursor location,
      *  and advances the cursor appropriately. */
     function void printString(String s) {
+        var int i;
+        let i=0;
+        while(i<s.length())
+        {
+            do Output.printChar(s[i]);
+            let i = i+1;
+            do Output.backSpace();
+        }
+        return;
     }
 
     /** Displays the given integer starting at the cursor location,
      *  and advances the cursor appropriately. */
     function void printInt(int i) {
+        var String s;
+        let s = String.new(6);
+        do s.setInt(i);
+        do Output.printString(s);
     }
 
     /** Advances the cursor to the beginning of the next line. */
     function void println() {
+        if((selectedRow+1)<23)
+        {
+            do Output.moveCursor(selectedRow+1,0);
+        }
+        return;
     }
 
     /** Moves the cursor one column back. */
     function void backSpace() {
+        if ((selectedCol+1) <64) {
+            do Output.moveCursor(selectedRow,selectedCol+1);
+        }
+        else
+        {
+            do Output.println();
+        }
+        return;
+    }
+
+    /** Return the Array Address of the grid */
+    function Array getGrid(int Row , int Col) {
+        var Array grid;
+        var int i;
+        let i=0;
+        let grid = Array.new(11);
+        while(i<11)
+        {
+            let grid[i] = screenHead + ((Row*gridWidth+i)*screenLength)+(Col/2);
+        }
+        return grid;
+    }
+
+    /** Return bit mask for the given Col */
+    function int getBitMask(int Col)
+    {
+        if((Col/2*2)=Col)
+        {
+            return (~255);
+        }
+        else
+        {
+            return 255;
+        }
     }
 }

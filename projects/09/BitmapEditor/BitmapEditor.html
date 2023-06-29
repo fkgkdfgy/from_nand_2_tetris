@@ -38,41 +38,21 @@
         {
             var new_row = document.getElementById("new_row").value;
             var new_col = document.getElementById("new_col").value;
-
-            var row_ratio = new_row / grid_row;
-            var col_ratio = new_col / grid_col;
-            var _grid = new Array(new_row|0);
-
-            for (i=0; i<_grid.length; i++) {
-                _grid[i] = new Array(new_col|0);
-                for (j=0; j<_grid[i].length; j++) {
-                    _grid[i][j]=false;
-                }
-            }
-
-            for(i=0;i<grid.length;i++)
+            
+            var postProcessCallback = function(_grid,_row,_col)
             {
-                for(j=0;j<grid[i].length;j++)
-                {
-                    var selected_row = i* row_ratio|0;
-                    var selected_col = j* col_ratio|0;
-                    if(grid[i][j])
-                    {
-                        console.log('old: ',grid[i][j]);
-                        console.log('new_row: ',selected_row);
-                        console.log('new_col: ',selected_col);
-                        console.log('new: ',_grid[selected_row][selected_col]);
+                grid_col = _col;
+                grid_row = _row;
+                grid = _grid;
+                DisplayGrid();
+            };
 
-                        _grid[selected_row][selected_col] = grid[i][j];
-                    }
-                }
-            }
+            var resizeCallBack = function(Image){
+                resizeImage(Image,new_row,new_col,postProcessCallback);
+            };
 
-            grid_col = new_col;
-            grid_row = new_row;
-            grid = _grid;
+            var _grid = createImageFromArray(grid,resizeCallBack);
 
-            DisplayGrid();
         }
 
         // TODO: 旋转90度
@@ -137,12 +117,9 @@
         }
 
         function OnCellClicked(cell) {
-            console.log('id: ',cell.id);
             var i = cell.id / grid_col |0;
             var j = cell.id - i*grid_col;
-            console.log('old:',grid[i][j]);
             grid[i][j] = !grid[i][j];
-            console.log('new:',grid[i][j]);
 
             if (grid[i][j])
                 cell.style.backgroundColor = "black";
@@ -254,6 +231,76 @@
             str = "\tdo Memory.poke(memAddress+" + (row*32 + col) + ", " + value + ");\n";
             return str;
         }
+
+        function createImageFromArray(imageArray,callback) {
+            var rows = imageArray.length;
+            var cols = imageArray[0].length;
+
+            var canvas = document.createElement('canvas');
+            canvas.width = cols;
+            canvas.height = rows;
+
+            var context = canvas.getContext('2d');
+            var imageData = context.createImageData(cols, rows);
+            var data = imageData.data;
+
+            for (var i = 0; i < rows; i++) {
+                for (var j = 0; j < cols; j++) {
+                var value = imageArray[i][j] ? 255 : 0;
+                var offset = (i * cols + j) * 4;
+                data[offset] = value; // Red channel
+                data[offset + 1] = value; // Green channel
+                data[offset + 2] = value; // Blue channel
+                data[offset + 3] = 255; // Alpha channel
+                }
+            }
+
+            console.log('Idata: ',imageData.data);
+
+            context.putImageData(imageData, 0, 0);
+
+            var image = new Image();
+            image.onload = function (){
+                callback(image);
+            }
+            image.src = canvas.toDataURL();
+
+            return image;
+        }
+
+        function resizeImage(image, newRows, newCols,callback) {
+            var canvas = document.createElement('canvas');
+            canvas.width = newCols;
+            canvas.height = newRows;
+
+            var context = canvas.getContext('2d');
+            context.imageSmoothingEnabled = true;
+
+            context.drawImage(image, 0, 0, newCols, newRows);
+
+            console.log('newCols:', newCols);
+            console.log('newRows:', newRows);
+
+            console.log('Image width:', image.width);
+            console.log('Image height:', image.height);
+
+            var resizedImageArray = [];
+
+            for (var i = 0; i < newRows; i++) {
+                var newRow = [];
+
+                for (var j = 0; j < newCols; j++) {
+                var pixelData = context.getImageData(j, i, 1, 1).data;
+                var value = (pixelData[0] < 120) ? false : true;
+                newRow.push(value);
+                }
+
+                resizedImageArray.push(newRow);
+            }
+
+            callback(resizedImageArray,newRows,newCols); 
+        }
+
     </script>
 </head>
 <body onload="Init();">
@@ -271,18 +318,19 @@
                 <th align="left">Bitmap</th>
             </tr>
         </thead>
+        <tr>
+            <td><div id="grid"/></td>
+        </tr>
     </table>
 
     <table>
         <thead>
             <tr>
-                <th align="left">Bitmap</th>
                 <th align="left"></th>
                 <th align="left">Generated Jack Code</th>
             </tr>
         </thead>
         <tr>
-            <td><div id="grid"/></td>
             <td>
                 <form action="javascript:GenerateBitMap();">
                     <table>

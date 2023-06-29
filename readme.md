@@ -51,7 +51,7 @@ TESTS ALL PASS
 2. 按照 RAM + CPU + ROM 的架构，构建Computer
 TESTS ALL PASS
 
-### [project6 Assembler(Python)](hack_dev_suite/hack_assembler)
+### [project6 Assembler(Python)](submodule/hack_assembler)
 实现内容:
 1. 使用Python 实现一个Assembler将助记符翻译成0/1的机器语言，结构如下:
     - assembler_io 用于文件的输入和结果的输出 输入Jack.asm 输出 Jack.asm.hack
@@ -63,7 +63,7 @@ TESTS ALL PASS
 
 使用方法 TODO
     
-### [project7/8 两段式编译器一(Python)](hack_dev_suite/vm_translator)
+### [project7/8 两段式编译器一(Python)](submodule/vm_translator)
 实现内容:
 1. 使用Python 实现Compiler的偏底层部分，将VirtualMachine 码，翻译成助记符的机器语言,结构如下:
     - translator_io 用于文件的输入和结果的输出 输入Jack.vm 输出 Jack.vm.asm
@@ -78,7 +78,7 @@ TESTS ALL PASS
 实现内容:
 1. 使用Jack 做一个电子木鱼App
 
-### [project 10/11 两段式编译器二(Python)](hack_dev_suite/jack_compiler)
+### [project 10/11 两段式编译器二(Python)](submodule/jack_compiler)
 实现内容:
 1. 使用Python 实现Compiler 的偏上层部分，将Jack语言翻译成VM码，结构如下:
     - text_io 用于文件的输入和结果的输出 输入Jack.jack 输出 Jack.vm

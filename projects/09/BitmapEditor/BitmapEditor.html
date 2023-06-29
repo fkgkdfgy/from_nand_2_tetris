@@ -3,30 +3,84 @@
 <html>
 <head>
     <title>Sokoban Bitmap Editor</title>
+    <style>
+        td.grid-cell 
+        { width: 32px;
+          height: 32px; 
+        }
+    </style>
     <script type="text/javascript">
         var grid = new Array(0);
+        var grid_row = 4;
+        var grid_col = 16;
 
         function Init() {
             grid = InitGrid();
             DisplayGrid();            
         }
 
+        // 初始化一个512*256的数组
         function InitGrid() {
-            var _grid = new Array(16);
-            for (i=0; i<16; i++) {
-                _grid[i] = new Array(16);
-                for (j=0; j<16; j++) {
+            var _grid = new Array(grid_row);
+            for (i=0; i<_grid.length; i++) {
+                _grid[i] = new Array(grid_col);
+                for (j=0; j<_grid[i].length; j++) {
                     _grid[i][j]=false;
                 }
             }
             return _grid;
         }
 
+        /**
+         * 将原本的BitMap 对应的进行放大和缩小
+         */
+        function ResizeBitmap()
+        {
+            var new_row = document.getElementById("new_row").value;
+            var new_col = document.getElementById("new_col").value;
+
+            var row_ratio = new_row / grid_row;
+            var col_ratio = new_col / grid_col;
+            var _grid = new Array(new_row|0);
+
+            for (i=0; i<_grid.length; i++) {
+                _grid[i] = new Array(new_col|0);
+                for (j=0; j<_grid[i].length; j++) {
+                    _grid[i][j]=false;
+                }
+            }
+
+            for(i=0;i<grid.length;i++)
+            {
+                for(j=0;j<grid[i].length;j++)
+                {
+                    var selected_row = i* row_ratio|0;
+                    var selected_col = j* col_ratio|0;
+                    if(grid[i][j])
+                    {
+                        console.log('old: ',grid[i][j]);
+                        console.log('new_row: ',selected_row);
+                        console.log('new_col: ',selected_col);
+                        console.log('new: ',_grid[selected_row][selected_col]);
+
+                        _grid[selected_row][selected_col] = grid[i][j];
+                    }
+                }
+            }
+
+            grid_col = new_col;
+            grid_row = new_row;
+            grid = _grid;
+
+            DisplayGrid();
+        }
+
+        // TODO: 旋转90度
         function RotateBitmapRight() {
             var _grid = InitGrid();
 
-            for (i=0; i<16; i++) {
-                for (j=0; j<16; j++) {
+            for (i=0; i<grid_row; i++) {
+                for (j=0; j<grid_col; j++) {
                     _grid[j][15-i]=grid[i][j];
                 }
             }
@@ -35,11 +89,12 @@
             DisplayGrid();
         }
 
+        // TODO: 垂直镜像
         function MirrorBitmap() {
             var _grid = InitGrid();
 
-            for (i=0; i<16; i++) {
-                for (j=0; j<16; j++) {
+            for (i=0; i<grid_row; i++) {
+                for (j=0; j<grid_col; j++) {
                     _grid[i][15-j]=grid[i][j];
                 }
             }
@@ -51,9 +106,9 @@
         function DisplayGrid() {
             var str = "<table border=1 cellspacing=0>";
             var i,j, backgroundColor;
-            for (i=-1; i<16; i++) {
+            for (i=-1; i<grid_row; i++) {
                 str=str+"<tr>";
-                for (j=-1; j<16; j++) {
+                for (j=-1; j<grid_col; j++) {
                     if (i == -1 && j != -1) {
                         str=str+"<td>" + (j+1) + "</td>";
                     } else if (i != -1 && j == -1) {
@@ -67,7 +122,9 @@
                         else
                             backgroundColor = "white";
 
-                        str=str+"<td onclick=\"OnCellClicked(this)\" id="; str=str+(i*16+j); str=str+" width=16 height=16 bgcolor=" + backgroundColor + "></td>";
+                        str=str+"<td onclick=\"OnCellClicked(this)\" id="; 
+                        str=str+(i*grid_col+j); 
+                        str=str+" class=\"grid-cell\" bgcolor=" + backgroundColor + "></td>";
                     }                                        
                 }
                 str=str+"</tr>";
@@ -80,9 +137,13 @@
         }
 
         function OnCellClicked(cell) {
-            var i = cell.id / 16 |0;
-            var j = cell.id - i*16;
+            console.log('id: ',cell.id);
+            var i = cell.id / grid_col |0;
+            var j = cell.id - i*grid_col;
+            console.log('old:',grid[i][j]);
             grid[i][j] = !grid[i][j];
+            console.log('new:',grid[i][j]);
+
             if (grid[i][j])
                 cell.style.backgroundColor = "black";
             else
@@ -91,7 +152,7 @@
         }
 
         function GenerateBitMap() {
-            var i, j;
+            var i, j, k;
             var value;
 
             var functionTypeSelect = document.getElementById('functionType');            
@@ -102,50 +163,95 @@
                                     document.getElementById('functionName').value +
                                     "(int location) {\n\tlet memAddress = 16384+location;\n";
 
-            for (i=0; i<16; i++) {
+            for (i=0; i<grid_row; i++) {
                 //get grid binary representation
-                binary = "";
-                for (j=0; j<16; j++) {
-                    if (grid[i][j])
-                        binary = "1" + binary;
-                    else
-                        binary = "0" + binary;
-                }
-              
-                isNegative = false;
-                //if number is negative, get its  one's complement
-                if (binary[0] == "1") {
-                    isNegative = true;
-                    oneComplement = "";
-                    for (k=0; k<16; k++) {
-                        if (binary[k] == "1")
-                            oneComplement = oneComplement + "0";
-                        else
-                            oneComplement = oneComplement + "1";
+                var grid_col_bit_size = grid_col/16;
+                for(k=0;k<grid_col_bit_size;k++)
+                {
+
+                    binary = GetBinaryValue(i,k);
+                    
+                    //if number is negative, get its  one's complement
+                    complement = CalculateComplement(binary);
+                    // console.log('complement: ',complement);
+                    isNegative = false;
+                    if(binary[0] == "1")
+                    {
+                        isNegative = true;
                     }
-                    binary = oneComplement;                 
+                    
+                    //calculate one's complement decimal value
+                    value = CalculateValueFromComplement(complement);
+
+                    //two's complement value if it is a negative value
+                    if (isNegative == true)
+                        value = -(value + 1)
+                    
+                    generateCode.value = generateCode.value + GenerateCodeLine(i,k,value);
                 }
-                
-                //calculate one's complement decimal value
-                value = 0;
-                for (k=0; k<16; k++) {
-                    value = value * 2;
-                    if (binary[k] == "1")
-                        value=value+1;
-                }                
-
-                //two's complement value if it is a negative value
-                if (isNegative == true)
-                    value = -(value + 1)
-
-                generateCode.value = generateCode.value + GenerateCodeLine(i, value);
             }
 
             generateCode.value = generateCode.value + "\treturn;\n}";
         }
 
-        function GenerateCodeLine(row, value) {
-            str = "\tdo Memory.poke(memAddress+" + row*32 + ", " + value + ");\n";
+        /**
+         * 计算十进制值
+         * @param complement 补码
+         */
+        function CalculateValueFromComplement(complement)
+        {
+            var value = 0;
+            for (k=0; k<16; k++) {
+                value = value * 2;
+                if (complement[k] == "1")
+                    value=value+1;
+            }                
+            return value;
+        }
+
+        /** 
+         * 计算补码 
+         * @param binary 二进制值
+         */
+        function CalculateComplement(binary) {
+            var i;
+            var complement = "";
+            if(binary[0]=="1")
+            {
+                for (i=0; i<16; i++) 
+                {
+                    if (binary[i] == "1")
+                        complement = complement + "0";
+                    else
+                        complement = complement + "1";
+                }
+                return complement;
+            }
+            complement = binary;
+            return complement;
+        }
+
+        /**
+         * 获取二进制值
+         * @param row 0-256
+         * @param col 0-31
+         * @return
+         */
+        function GetBinaryValue(row, col) {
+            var i;
+            var binary = "";
+            var grid_start = col*16 , grid_end = grid_start + 16;
+            for (i=grid_start; i<grid_end; i++) {
+                if (grid[row][i])
+                    binary = "1" + binary;
+                else
+                    binary = "0" + binary;
+            }
+            return binary;
+        }
+
+        function GenerateCodeLine(row, col, value) {
+            str = "\tdo Memory.poke(memAddress+" + (row*32 + col) + ", " + value + ");\n";
             return str;
         }
     </script>
@@ -158,6 +264,15 @@
     clicking the appropriate buttons.</p>
     <p>When you are finished drawing, you may select function type and enter function's name.</p>
     <p>
+    
+    <table>
+        <thead>
+            <tr>
+                <th align="left">Bitmap</th>
+            </tr>
+        </thead>
+    </table>
+
     <table>
         <thead>
             <tr>
@@ -192,6 +307,11 @@
                 <tr>
                     <td align="center"><input type="button" value="Rotate right" onclick="RotateBitmapRight()"/></td>
                     <td align="center"><input type="button" value="Vertical Mirror" onclick="MirrorBitmap()"/></td>
+                    <td align="center">row:</td>
+                    <td align="center"><input type="number" id="new_row" value="8"></td>
+                    <td align="center">col:</td>
+                    <td align="center"><input type="number" id="new_col" value="16"></td>
+                    <td align="center"><input type="button" value="ResizeBitMap" onclick="ResizeBitmap()" /></td>
                 </tr>
             </table>
         </tr>

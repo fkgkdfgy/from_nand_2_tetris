@@ -1,0 +1,8 @@
+function Main.main 1
+call WoodenFish.new 0
+pop local 0
+push local 0
+call WoodenFish.start 1
+pop temp 0
+push constant 0
+return

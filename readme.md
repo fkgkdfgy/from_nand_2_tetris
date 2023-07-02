@@ -1,13 +1,14 @@
-# From Nand To Tetris
+# From Nand To Tetris(计算机系统要素)
 Nand2Tetris：从头开始构建计算机系统，从 nand 到 tetris（nand 是构建其他门的基本逻辑门），从硬件到软件。
 
 感谢 Noam Nisan 教授和 Shimon Shocken 教授写了一本超级酷的书，创造了优秀的工具并教授了很棒的课程。
 
 
-### [电子木鱼 project 09](projects/09/ElectronicWoodenFish)
+## [电子木鱼 project 09](projects/09/ElectronicWoodenFish)
 
 ![Alt Text](image/wooden_fish.gif)
 
+## Project 内容
 ### [project1 从nand 到逻辑门](projects/01)
 实现内容:
 1. 基于提供的HardWareSimulator，使用与非门(nand: ~(A and B)) 构建基础的逻辑门 And Or Not Xor Mux Dmux

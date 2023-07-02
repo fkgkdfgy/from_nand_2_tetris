@@ -4,7 +4,8 @@ Nand2Tetris: Build a computer system from the ground up, from nand to tetris (na
 Thanks professor Noam Nisan and professor Shimon Shocken for writing a super cool book and creating excellent tools and teaching great courses.
 
 
-### 木鱼(project 07)
+### [电子木鱼 project 09](projects/09/ElectronicWoodenFish)
+
 ![Alt Text](image/wooden_fish.gif)
 
 ### [project1 从nand 到逻辑门](projects/01)
@@ -53,6 +54,7 @@ TESTS ALL PASS
 实现内容:
 1. 按照 A寄存器(Addr registor) + D寄存器(Data registor) + PC + ALU 的架构构建 CPU 模块
 2. 按照 RAM + CPU + ROM 的架构，构建Computer
+
 TESTS ALL PASS
 
 ### [project6 Assembler(Python)](submodule/hack_assembler)
@@ -64,8 +66,6 @@ TESTS ALL PASS
     - assembler_translator 用于将拆解后的文本翻译成0/1机器语言
 
 TESTS ALL PASS
-
-使用方法 TODO
     
 ### [project7/8 两段式编译器一(Python)](submodule/vm_translator)
 实现内容:
@@ -75,8 +75,6 @@ TESTS ALL PASS
     - memory_translator 将拆分的文本翻译成能使用的机器语言
 
 TESTS ALL PASS
-
-使用方法 TODO
 
 ### [project 9 电子木鱼](projects/09/ElectronicWoodenFish)
 实现内容:
@@ -98,7 +96,6 @@ TESTS ALL PASS
 
 TESTS ALL PASS
 
-使用方法 TODO
 ### [project 12 OS](projects/12)
 实现内容:
 1. 使用可翻译的Jack语言来实现需要的所有内部组件:

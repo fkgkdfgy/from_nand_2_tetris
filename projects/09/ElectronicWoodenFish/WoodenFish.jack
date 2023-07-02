@@ -1,19 +1,62 @@
 class WoodenFish
 {
-    field int mallet_status;
+    field int mallet_status, score;
+    field Array wooden_fish_coordinate;
+    field Array mallet_status_coordinate;
+    filed Array achievement_coordinate;
+    
     constructor WoodenFish new()
     {
         let mallet_status = 0;
+        let score = 0;
         return this;
     }
 
     method void start(){
+        var int pressed_key;
+        let pressed_key = 0;
         do drawWoodenFish(0);
         while(1)
         {
-            
+            let pressed_key = Keyboard.keyPressed();
+            if(~(pressed_key = 0))
+            {
+                let score = score +1;
+                do displayScore();
+                do displayMallet();
+                do triggerPrice();
+            }
+            Sys.wait(100)
         }
         return ;
+    }
+
+
+
+    method void displayScore(int score){
+
+        return;
+    }
+
+    method void triggerAchievement(int score){
+
+        return;
+    }
+
+    method void updateMalletStatus(){
+        return;
+    }
+
+    method displayMallet(){
+        return;
+    } 
+
+    method void drawAchievement(){
+        return;
+    }
+
+    method void drawMallet(){
+        return;
     }
 
     method void drawWoodenFish(int location) {

@@ -10,6 +10,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
+            "args": ["C:\\Users\\lwl\\Desktop\\nand2tetris\\nand2tetris\\projects\\09\\ElectronicWoodenFish"],
             "justMyCode": true
         }
     ]

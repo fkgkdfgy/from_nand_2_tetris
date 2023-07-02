@@ -138,7 +138,7 @@
             generateCode = document.getElementById('generatedCode');
             generateCode.value =    methodType + " void " +
                                     document.getElementById('functionName').value +
-                                    "(int location) {\n\tlet memAddress = 16384+location;\n";
+                                    "(int location) {\n\tvar int memAddress;\n\tlet memAddress = 16384+location;\n";
 
             for (i=0; i<grid_row; i++) {
                 //get grid binary representation

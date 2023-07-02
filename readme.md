@@ -1,7 +1,7 @@
 # From Nand To Tetris
-Nand2Tetris: Build a computer system from the ground up, from nand to tetris (nand is the fundamental logic gate to build others gates), from hardware to software.
+Nand2Tetris：从头开始构建计算机系统，从 nand 到 tetris（nand 是构建其他门的基本逻辑门），从硬件到软件。
 
-Thanks professor Noam Nisan and professor Shimon Shocken for writing a super cool book and creating excellent tools and teaching great courses.
+感谢 Noam Nisan 教授和 Shimon Shocken 教授写了一本超级酷的书，创造了优秀的工具并教授了很棒的课程。
 
 
 ### [电子木鱼 project 09](projects/09/ElectronicWoodenFish)

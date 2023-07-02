@@ -4,7 +4,7 @@ Nand2Tetris: Build a computer system from the ground up, from nand to tetris (na
 Thanks professor Noam Nisan and professor Shimon Shocken for writing a super cool book and creating excellent tools and teaching great courses.
 
 
-### 木鱼
+### 木鱼(project 07)
 ![Alt Text](image/wooden_fish.gif)
 
 ### [project1 从nand 到逻辑门](projects/01)
@@ -81,7 +81,8 @@ TESTS ALL PASS
 ### [project 9 电子木鱼](projects/09/ElectronicWoodenFish)
 实现内容:
 1. 使用Jack 做一个电子木鱼App
-2. 拓展原本的BitMapEditor，添加下载和加载、Resize的功能
+2. 原本的BitMapEditor 代码简单重构
+3. 拓展原本的BitMapEditor，添加下载和加载、Resize的功能
 (大工程都在学javascript了)
 
 ### [project 10/11 两段式编译器二(Python)](submodule/jack_compiler)

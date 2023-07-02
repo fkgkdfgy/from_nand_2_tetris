@@ -90,7 +90,7 @@ TESTS ALL PASS
     - tokenizer 去除所有的注释，并对原文本进行拆分
     - grammar 将所有的拆分文本，翻译成VM 码
     - test_.*/test_material 所有的自测单元测试和自动测试材料
-    - .*_modules grammar 内部依赖的所有Handler
+    - .*_modules grammar.py内部依赖的所有Handler
     
 (人间噩梦)
 

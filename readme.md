@@ -109,3 +109,5 @@ TESTS ALL PASS
     - Screen 图形输出
     - Output 文本输出
     - Sys 调用以上所有组件的init(), 并使用Sys.main() 来调用Main.main()
+
+TEST FAILED

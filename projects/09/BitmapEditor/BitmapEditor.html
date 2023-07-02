@@ -301,6 +301,43 @@
             callback(resizedImageArray,newRows,newCols); 
         }
 
+        function SaveBitMap()
+        {
+            const jsonString = JSON.stringify(grid);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'bitmap.json';
+            link.click();
+
+            URL.revokeObjectURL(url);
+        }
+
+        function LoadBitMap(event) {
+            const selectedFile = event.target.files[0];
+
+            console.log('selected_file: ', selectedFile)
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const fileContent = e.target.result;
+                const data = JSON.parse(fileContent);
+                var bitmap = data.map(row => row.map(item => item));
+
+                console.log(data);
+
+                // 现在你可以使用bitmap变量，它是一个二维数组，包含从JSON文件中读取的数据
+                console.log(bitmap);
+                grid = bitmap;
+                grid_row = grid.length;
+                grid_col = grid[0].length;
+                DisplayGrid();
+            };
+
+            reader.readAsText(selectedFile);
+            }
     </script>
 </head>
 <body onload="Init();">
@@ -363,6 +400,15 @@
                 </tr>
             </table>
         </tr>
+    </table>
+    <table>
+        <tr>
+            <td align="left">下载Bitmap(.json):</td>
+            <td align="left"><input type="button" value="Download BitMap" onclick="SaveBitMap()"/></td>
+            <td align="left">选择需要加载的Bitmap(.json):</td>
+            <td align="left"><input type="file" onchange="LoadBitMap(event)"/></td>
+        </tr>
+
     </table>
 </body>
 </html>
